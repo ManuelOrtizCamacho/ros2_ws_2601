@@ -1,0 +1,128 @@
+<?xml version='1.0'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot_car_mjoc">
+
+  <!-- ====== ARGUMENTOS QUE VIENEN DEL LAUNCH (nuevo) ====== -->
+  <xacro:arg name="wheel_radius" default="0.025"/>
+  <xacro:arg name="wheel_base"   default="0.0925"/>
+  <xacro:arg name="wheel_length" default="0.0125"/>
+
+  <!-- ====== PROPIEDADES (metros) ====== -->
+  <!-- Caja: (10,8,5) cm -->
+  <xacro:property name="body_x" value="0.10"/>
+  <xacro:property name="body_y" value="0.08"/>
+  <xacro:property name="body_z" value="0.05"/>
+
+  <!-- Ruedas: ahora vienen del launch en vez de hardcodeadas -->
+  <xacro:property name="wheel_r" value="$(arg wheel_radius)"/>  <!-- ← CAMBIADO -->
+  <xacro:property name="wheel_l" value="$(arg wheel_length)"/>  <!-- ← CAMBIADO -->
+
+  <!-- Apoyo: radio=2.5 cm -->
+  <xacro:property name="caster_r" value="0.025"/>
+
+  <!-- Posición vertical del centro de la rueda -->
+  <xacro:property name="wheel_z" value="${wheel_r}"/>
+
+  <!-- Posición del cuerpo (centro) para que el fondo quede a z=0 -->
+  <xacro:property name="body_center_z" value="${(body_z/2) + wheel_r}"/>
+
+  <!-- Separación lateral de las ruedas -->
+  <xacro:property name="wheel_y" value="${(body_y/2) + (wheel_l/2)}"/>
+
+  <!-- Longitudinal: ruedas hacia la mitad frontal -->
+  <xacro:property name="wheel_x" value="0.03"/>
+
+  <!-- Apoyo (caster) hacia atrás -->
+  <xacro:property name="caster_x" value="-0.04"/>
+  <xacro:property name="caster_z" value="${caster_r}"/>
+
+  <!-- ====== LINKS (sin cambios) ====== -->
+  <link name="base_link"/>
+
+  <link name="chassis">
+    <visual>
+      <origin xyz="0 0 ${body_center_z}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_x} ${body_y} ${body_z}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${body_center_z}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_x} ${body_y} ${body_z}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="wheel_left">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_r}" length="${wheel_l}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_r}" length="${wheel_l}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="wheel_right">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_r}" length="${wheel_l}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_r}" length="${wheel_l}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="caster">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="${caster_r}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="${caster_r}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ====== JOINTS (sin cambios) ====== -->
+  <joint name="base_to_chassis" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="chassis_to_wheel_left" type="continuous">
+    <parent link="chassis"/>
+    <child link="wheel_left"/>
+    <origin xyz="${wheel_x} ${wheel_y} ${wheel_z}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="chassis_to_wheel_right" type="continuous">
+    <parent link="chassis"/>
+    <child link="wheel_right"/>
+    <origin xyz="${wheel_x} -${wheel_y} ${wheel_z}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="chassis_to_caster" type="fixed">
+    <parent link="chassis"/>
+    <child link="caster"/>
+    <origin xyz="${caster_x} 0 ${caster_z}" rpy="0 0 0"/>
+  </joint>
+
+</robot>
